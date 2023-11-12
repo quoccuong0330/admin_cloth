@@ -13,6 +13,7 @@ import {
   getFirestore,
   collection,
   getDownloadURL,
+  updateDoc,
 } from "firebase/firestore";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-unused-vars
@@ -28,25 +29,27 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Image from "react-bootstrap/Image";
-import './Edit.css'
+import { useLocation } from "react-router-dom";
+import "./Update.css";
 
-const initData = {
-  name: "",
-  price: "",
-  category: "",
-  size: "",
-  color: "",
-  shortDescription: "",
-  description: "",
-  imgBase64: "",
-};
+const Update = ({ props }) => {
+  const location = useLocation();
+  const { data } = location.state;
 
-const Edit = () => {
+  const initData = {
+    name: data.name,
+    price: data.price,
+    category: data.category,
+    size: data.size,
+    color: data.color,
+    shortDescription: data.shortDescription,
+    description: data.description,
+    imgBase64: data.imageUrl,
+    projectId: data.projectId,
+    count: data.count,
+  };
+
   const [state, setState] = useState(initData);
-  const [fetchData, setFetchData] = useState([]);
-  const [imageUpload, setImageUpload] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
-
   const {
     name,
     price,
@@ -55,8 +58,13 @@ const Edit = () => {
     color,
     shortDescription,
     description,
+    imgBase64,
+    projectId,
     count,
   } = state;
+  const [fetchData, setFetchData] = useState([]);
+  const [imageUpload, setImageUpload] = useState(null);
+  const [imageUrl, setImageUrl] = useState(imgBase64);
 
   const dbStore = getFirestore();
 
@@ -75,30 +83,30 @@ const Edit = () => {
 
   console.log("imageUrl: ", imageUrl);
 
-  const newDocRef = doc(collection(dbStore, "Products"));
+  const newDocRef = doc(dbStore, "Products", projectId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await setDoc(newDocRef, {
-      projectId: newDocRef.id,
+    await updateDoc(newDocRef, {
       name,
       category,
       price,
       size,
       color,
-      count,
+      count: 100,
       shortDescription,
       description,
       imageUrl,
+      count,
     });
 
-    console.log("oke");
+    console.log("update oke");
   };
 
   return (
     <>
       <div className="title ">
-        <p className="title-name"> ADD PRODUCT</p>
+        <p className="title-name"> UPDATE  PRODUCT</p>
       </div>
       <Form className="col-6 mx-auto" onSubmit={handleSubmit}>
         <Row className="mb-3">
@@ -109,7 +117,6 @@ const Edit = () => {
               name="name"
               onChange={handleOnChange}
               value={name}
-              type="text"
             />
           </Col>
           <Col>
@@ -119,7 +126,6 @@ const Edit = () => {
               name="price"
               onChange={handleOnChange}
               value={price}
-              type="number"
             />
           </Col>
         </Row>
@@ -236,4 +242,4 @@ const Edit = () => {
   );
 };
 
-export default Edit;
+export default Update;
